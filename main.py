@@ -5,10 +5,12 @@ def get_processes():
     """Get process arrival and burst times from the user."""
     n = int(input("Enter number of processes: "))
     processes = []
+
     for i in range(n):
         arrival = int(input(f"Enter arrival time for P{i}: "))
         burst = int(input(f"Enter burst time for P{i}: "))
         processes.append({"pid": f"P{i}", "arrival": arrival, "burst": burst})
+
     return processes
 
 
@@ -16,16 +18,20 @@ def display_results(title, processes, gantt, completion):
     """Display Gantt chart, waiting times, turnaround times, and averages."""
     print(f"\n{title}")
     print("\nGantt Chart:")
-    for pid, _, _ in gantt:
+
+    for pid, start, end in gantt:
         print(f"| {pid} ", end="")
     print("|")
+
     if gantt:
         print(gantt[0][1], end="")
         for _, _, end in gantt:
             print(f" -> {end}", end="")
         print()
 
-    total_waiting = total_turnaround = 0
+    total_waiting = 0
+    total_turnaround = 0
+
     print("\nProcess\tArrival\tBurst\tWaiting\tTurnaround")
     for p in processes:
         turnaround = completion[p["pid"]] - p["arrival"]
@@ -39,38 +45,53 @@ def display_results(title, processes, gantt, completion):
 
 
 def fcfs():
-    """First Come First Serve (non-preemptive)."""
+    """First Come First Serve: a non-preemptive CPU scheduling algorithm."""
     processes = get_processes()
     ordered = sorted(processes, key=lambda p: (p["arrival"], int(p["pid"][1:])))
-    time, gantt, completion = 0, [], {}
+
+    time = 0
+    gantt = []
+    completion = {}
+
     for p in ordered:
+        # CPU stays idle if the next process has not arrived yet.
         if time < p["arrival"]:
             gantt.append(("Idle", time, p["arrival"]))
             time = p["arrival"]
+
         start = time
         time += p["burst"]
         gantt.append((p["pid"], start, time))
         completion[p["pid"]] = time
+
     display_results("FCFS SCHEDULING", processes, gantt, completion)
 
 
 def round_robin():
-    """Round Robin (preemptive)."""
+    """Round Robin: a preemptive CPU scheduling algorithm."""
     processes = get_processes()
     quantum = int(input("Enter time quantum: "))
+
     if quantum <= 0:
         print("Time quantum must be greater than 0.")
         return
 
     ordered = sorted(processes, key=lambda p: (p["arrival"], int(p["pid"][1:])))
     remaining = {p["pid"]: p["burst"] for p in processes}
-    completion, ready_queue, gantt = {}, deque(), []
-    time = index = 0
+    completion = {}
+    ready_queue = deque()
+    gantt = []
+
+    time = 0
+    index = 0
 
     while len(completion) < len(processes):
+        # Add all processes that have arrived to the ready queue.
         while index < len(ordered) and ordered[index]["arrival"] <= time:
             ready_queue.append(ordered[index])
             index += 1
+
+        # If no process is ready, move time to the next arrival.
         if not ready_queue:
             next_arrival = ordered[index]["arrival"]
             gantt.append(("Idle", time, next_arrival))
@@ -79,15 +100,17 @@ def round_robin():
 
         process = ready_queue.popleft()
         pid = process["pid"]
-        run = min(quantum, remaining[pid])
+        execution_time = min(quantum, remaining[pid])
         start = time
-        time += run
-        remaining[pid] -= run
+        time += execution_time
+        remaining[pid] -= execution_time
         gantt.append((pid, start, time))
 
+        # Processes arriving during this time slice enter the queue first.
         while index < len(ordered) and ordered[index]["arrival"] <= time:
             ready_queue.append(ordered[index])
             index += 1
+
         if remaining[pid] > 0:
             ready_queue.append(process)
         else:
@@ -96,92 +119,135 @@ def round_robin():
     display_results("ROUND ROBIN SCHEDULING", processes, gantt, completion)
 
 
-def read_matrix(name, rows, cols):
-    """Read a resource matrix from console input."""
-    matrix = []
-    print(f"\nEnter {name} Matrix ({cols} values per process):")
-    for i in range(rows):
-        while True:
-            try:
-                values = list(map(int, input(f"P{i}: ").split()))
-                if len(values) != cols or any(v < 0 for v in values):
-                    print(f"Please enter exactly {cols} non-negative integers.")
-                    continue
-                matrix.append(values)
-                break
-            except ValueError:
-                print("Please enter integers separated by spaces.")
-    return matrix
-
-
 def bankers_algorithm():
-    """Banker's Algorithm using matrices entered by the user."""
     print("\nBANKER'S ALGORITHM")
-    try:
-        process_count = int(input("Enter number of processes: "))
-        resource_count = int(input("Enter number of resource types: "))
-    except ValueError:
-        print("Please enter valid integers.")
-        return
 
-    if process_count <= 0 or resource_count <= 0:
-        print("Number of processes and resources must be greater than 0.")
-        return
+    # Get number of processes and resources
+    num_processes = int(input("Enter number of processes: "))
+    num_resources = int(input("Enter number of resources: "))
 
-    allocation = read_matrix("Allocation", process_count, resource_count)
-    maximum = read_matrix("Maximum", process_count, resource_count)
+    # Input Allocation Matrix
+    allocation = []
 
+    print("\nEnter Allocation Matrix:")
+    print(f"Enter {num_resources} values separated by spaces.")
+
+    for i in range(num_processes):
+        while True:
+            row = list(map(int, input(f"P{i}: ").split()))
+
+            if len(row) == num_resources:
+                allocation.append(row)
+                break
+            else:
+                print(f"Please enter exactly {num_resources} values.")
+
+    # Input Maximum Matrix
+    maximum = []
+
+    print("\nEnter Maximum Matrix:")
+    print(f"Enter {num_resources} values separated by spaces.")
+
+    for i in range(num_processes):
+        while True:
+            row = list(map(int, input(f"P{i}: ").split()))
+
+            if len(row) == num_resources:
+                maximum.append(row)
+                break
+            else:
+                print(f"Please enter exactly {num_resources} values.")
+
+    # Input Available Resources
     while True:
-        try:
-            available = list(map(int, input(f"\nEnter Available Resources ({resource_count} values): ").split()))
-            if len(available) != resource_count or any(v < 0 for v in available):
-                print(f"Please enter exactly {resource_count} non-negative integers.")
-                continue
+        available = list(
+            map(
+                int,
+                input(
+                    f"\nEnter Available Resources "
+                    f"({num_resources} values): "
+                ).split()
+            )
+        )
+
+        if len(available) == num_resources:
             break
-        except ValueError:
-            print("Please enter integers separated by spaces.")
+        else:
+            print(f"Please enter exactly {num_resources} values.")
 
-    # Maximum allocation cannot be less than the resources already allocated.
-    for i in range(process_count):
-        for j in range(resource_count):
-            if maximum[i][j] < allocation[i][j]:
-                print(f"\nInvalid input: Maximum for P{i}, resource R{j} is less than its Allocation.")
-                return
-
+    # Calculate Need Matrix
     # Need = Maximum - Allocation
-    need = [[maximum[i][j] - allocation[i][j] for j in range(resource_count)]
-            for i in range(process_count)]
+    need = []
 
+    for i in range(num_processes):
+        row = []
+
+        for j in range(num_resources):
+            row.append(maximum[i][j] - allocation[i][j])
+
+        need.append(row)
+
+    # Display Need Matrix
     print("\nNeed Matrix:")
-    for i, row in enumerate(need):
-        print(f"P{i}: {row}")
 
+    for i in range(num_processes):
+        print(f"P{i}: {need[i]}")
+
+    # Banker's Safety Algorithm
     work = available.copy()
-    finished = [False] * process_count
+    finish = [False] * num_processes
     safe_sequence = []
 
-    # Repeatedly find an unfinished process whose Need can be met by Work.
-    while len(safe_sequence) < process_count:
-        found = False
-        for i in range(process_count):
-            if not finished[i] and all(need[i][j] <= work[j] for j in range(resource_count)):
-                for j in range(resource_count):
-                    work[j] += allocation[i][j]
-                finished[i] = True
-                safe_sequence.append(f"P{i}")
-                found = True
-        if not found:
+    while len(safe_sequence) < num_processes:
+
+        process_found = False
+
+        for i in range(num_processes):
+
+            # Check if process is unfinished
+            if not finish[i]:
+
+                can_execute = True
+
+                # Check if Need <= Available/Work
+                for j in range(num_resources):
+                    if need[i][j] > work[j]:
+                        can_execute = False
+                        break
+
+                # If process can execute
+                if can_execute:
+
+                    # Release allocated resources
+                    for j in range(num_resources):
+                        work[j] += allocation[i][j]
+
+                    finish[i] = True
+                    safe_sequence.append(i)
+                    process_found = True
+
+        # If no process can execute,
+        # the system is unsafe
+        if not process_found:
             break
 
-    if len(safe_sequence) == process_count:
-        print("\nSystem is in a Safe State.")
-        print("Safe Sequence: " + " -> ".join(safe_sequence))
-    else:
-        print("\nSystem is in an Unsafe State.")
-        print("No safe sequence exists.")
+    # Display result
+    if len(safe_sequence) == num_processes:
 
+        print("\nSystem is in a Safe State.")
+
+        print(
+            "Safe Sequence: "
+            + " -> ".join(f"P{i}" for i in safe_sequence)
+        )
+
+    else:
+
+        print("\nSystem is in an Unsafe State.")
+        print("No Safe Sequence exists.")
 
 def main():
+    """Main menu for the Operating System scheduling simulator."""
     while True:
         print("\n" + "=" * 45)
         print("          OPERATING SYSTEM SIMULATOR")
@@ -190,6 +256,7 @@ def main():
         print("2. Round Robin Scheduling (Preemptive)")
         print("3. Banker's Algorithm")
         print("4. Exit")
+
         choice = input("Enter choice: ").strip()
 
         if choice == "1":
