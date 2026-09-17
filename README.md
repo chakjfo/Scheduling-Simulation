@@ -22,18 +22,27 @@ The program displays:
 - Average Turnaround Time
 
 ### Banker's Algorithm
-The program also implements **Banker's Algorithm** to determine whether the given system is in a safe or unsafe state.
+The program implements **Banker's Algorithm** to check whether a system is in a safe or unsafe state.
 
-As required by the activity, the Banker's Algorithm portion does **not require user input**. The matrices are already defined in the source code and the program displays only the required results:
-- Need Matrix
-- Safe or Unsafe State
-- Safe Sequence, if the system is safe
+The user enters:
+- Number of processes
+- Number of resource types
+- Allocation matrix
+- Maximum matrix
+- Available resources
 
-For the included example, the expected safe sequence is:
+The program calculates the Need Matrix using:
 
 ```text
-P1 -> P3 -> P4 -> P0 -> P2
+Need = Maximum - Allocation
 ```
+
+It then displays:
+- Need Matrix
+- Whether the system is in a Safe State or Unsafe State
+- Safe Sequence of processes, if one exists
+
+> The submission instruction saying that only the Banker's Algorithm output is needed refers to the sample/screenshot for submission. The actual program still accepts all required Banker's Algorithm inputs from the user.
 
 ## Requirements
 
@@ -72,7 +81,7 @@ Choose **1** for FCFS, **2** for Round Robin, **3** for Banker's Algorithm, or *
 
 ## Files
 
-- `main.py` — Python source code containing the scheduling algorithms and Banker's Algorithm.
+- `main.py` — Python source code containing FCFS, Round Robin, and Banker's Algorithm.
 - `README.md` — Instructions and explanation of the program.
 
-The sample input/output file required for submission can be added separately after running the program with your chosen sample data.
+The sample input/output file required for submission can be added separately after running the program with your chosen sample data. For Banker's Algorithm, only its output/screenshot needs to be included in that submission evidence.
