@@ -1,87 +1,29 @@
 # Scheduling Simulation
 
-A simple Python program for an Operating Systems activity that demonstrates CPU scheduling and deadlock avoidance.
+This is a simple Python program for our Operating Systems activity. It demonstrates CPU scheduling algorithms and Banker's Algorithm.
 
-## Algorithms Included
+## Algorithms
 
-### CPU Scheduling
-- **First Come First Serve (FCFS)** — Non-Preemptive
-- **Round Robin** — Preemptive
+- **FCFS** - Non-Preemptive Scheduling
+- **Round Robin** - Preemptive Scheduling
+- **Banker's Algorithm** - checks if the system is in a safe or unsafe state
 
-For CPU scheduling, the program accepts console input for:
-- Number of processes
-- Arrival time of each process
-- Burst time of each process
-- Time quantum for Round Robin
+## Inputs
 
-The program displays:
-- Gantt Chart / execution order
-- Waiting time of each process
-- Turnaround time of each process
-- Average Waiting Time
-- Average Turnaround Time
+For FCFS and Round Robin, enter the number of processes, arrival time, burst time, and time quantum for Round Robin.
 
-### Banker's Algorithm
-The program implements **Banker's Algorithm** to check whether a system is in a safe or unsafe state.
+For Banker's Algorithm, enter the number of processes, number of resources, Allocation Matrix, Maximum Matrix, and Available Resources.
 
-The user enters:
-- Number of processes
-- Number of resource types
-- Allocation matrix
-- Maximum matrix
-- Available resources
+## Output
 
-The program calculates the Need Matrix using:
-
-```text
-Need = Maximum - Allocation
-```
-
-It then displays:
-- Need Matrix
-- Whether the system is in a Safe State or Unsafe State
-- Safe Sequence of processes, if one exists
-
-> The submission instruction saying that only the Banker's Algorithm output is needed refers to the sample/screenshot for submission. The actual program still accepts all required Banker's Algorithm inputs from the user.
-
-## Requirements
-
-- Python 3.x
-- No external Python libraries are required.
+The scheduling algorithms display the Gantt Chart, Average Waiting Time, and Average Turnaround Time. Banker's Algorithm displays the Need Matrix, system state, and Safe Sequence if available.
 
 ## How to Run
 
-1. Download or clone this repository.
-2. Open a terminal or command prompt inside the project folder.
-3. Run:
+Make sure Python is installed, then run:
 
 ```bash
 python main.py
 ```
 
-If your computer uses `python3`, run:
-
-```bash
-python3 main.py
-```
-
-## Program Menu
-
-```text
-=============================================
-          OPERATING SYSTEM SIMULATOR
-=============================================
-1. FCFS Scheduling (Non-Preemptive)
-2. Round Robin Scheduling (Preemptive)
-3. Banker's Algorithm
-4. Exit
-```
-
-Choose **1** for FCFS, **2** for Round Robin, **3** for Banker's Algorithm, or **4** to exit.
-
-## Files
-
-- `main.py` — Python source code containing FCFS, Round Robin, and Banker's Algorithm.
-- `README.md` — Instructions and explanation of the program.
-
-The sample input/output file required for submission can be added separately after running the program with your chosen sample data. For Banker's Algorithm, only its output/screenshot needs to be included in that submission evidence.
+Choose an option from the menu and enter the requested values.
